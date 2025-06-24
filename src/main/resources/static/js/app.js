@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function performSearchWithoutRedirect(query) {
         const searchUrl = `/api/search?query=${encodeURI(query)}`;
         const result = await fetch(searchUrl, {
-            method: "POST",
+            method: "GET",
         }).catch(error => alert("An error occurred: " + error));
 
         const data = await result.json();
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function performSearch(query) {
         const searchUrl = `/api/search?query=${encodeURI(query)}`;
         const result = await fetch(searchUrl, {
-            method: "POST",
+            method: "GET",
         }).catch(error => alert("An error occurred: " + error));
 
         const data = await result.json();

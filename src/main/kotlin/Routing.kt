@@ -19,9 +19,9 @@ import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
     routing {
-        post("/api/search") {
+        get("/api/search") {
             val searchQuery = call.queryParameters["query"] ?: ""
-            if(searchQuery.isEmpty()) return@post call.respondText("""{"error": "Query is empty"}""")
+            if(searchQuery.isEmpty()) return@get call.respondText("""{"error": "Query is empty"}""")
 
             val searchResult = search(searchQuery)
 
