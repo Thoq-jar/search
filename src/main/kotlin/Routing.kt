@@ -19,10 +19,6 @@ import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
     routing {
-        get("/") {
-            call.respondRedirect("/static/index.html")
-        }
-
         post("/api/search") {
             val searchQuery = call.queryParameters["query"] ?: ""
             if(searchQuery.isEmpty()) return@post call.respondText("""{"error": "Query is empty"}""")
@@ -32,6 +28,6 @@ fun Application.configureRouting() {
             call.respondText(searchResult)
         }
 
-        staticResources("/static", "static")
+        staticResources("/", "static")
     }
 }
