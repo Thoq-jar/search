@@ -26,7 +26,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         resultsContainer.innerHTML = '';
 
-        Array.from(jsonResults.results).forEach(result => {
+        const results = jsonResults?.results || [];
+
+        if(results.length === 0) {
+            const noResultsElement = document.createElement("div");
+            noResultsElement.classList.add("no-results");
+            noResultsElement.classList.add("brand-tag");
+            noResultsElement.textContent = "No results found";
+            resultsContainer.appendChild(noResultsElement);
+            return;
+        }
+
+        results.forEach(result => {
             const resultElement = document.createElement("div");
             resultElement.classList.add("result");
 
