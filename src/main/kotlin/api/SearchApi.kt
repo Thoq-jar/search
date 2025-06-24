@@ -59,12 +59,14 @@ suspend fun search(query: String): String {
             requestTimeout = 30000
         }
     }
-    
+
     return try {
         val response = client.request("https://html.duckduckgo.com/html/?q=$query") {
             method = io.ktor.http.HttpMethod.Get
             userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36")
         }
+
+        println("Response status: ${response.status}")
 
         if(response.status.value != 200) return """{"error": "HTTP ${response.status}"}"""
 

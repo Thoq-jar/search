@@ -33,7 +33,8 @@ fun Application.configureRouting() {
 
             try {
                 val searchResult = search(searchQuery)
-                
+
+                println("Search result: $searchResult")
                 if (searchResult.startsWith("""{"error":""")) {
                     call.respondText(
                         searchResult,
