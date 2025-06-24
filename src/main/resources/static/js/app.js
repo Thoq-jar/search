@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchButton = document.getElementById("search-button");
     const resultsContainer = document.getElementById("results-container");
     const homepageSection = document.getElementById("homepage-section");
-    const loadingContainer = document.getElementById("loading-container");
 
     if(window.location.toString().includes("?q=")) {
         const query = decodeURIComponent(window.location.search.split("=")[1]);
@@ -22,17 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
         resultsContainer.classList.remove("hidden");
     }
 
-    function setLoading(loading) {
-        if(loading) {
-            loadingContainer.classList.remove("hidden");
-        } else {
-            loadingContainer.classList.add("hidden");
-        }
-    }
-
     function renderResults(jsonResults) {
         showResultsContainer();
-        setLoading(false);
 
         resultsContainer.innerHTML = '';
 
@@ -67,8 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function performSearchWithoutRedirect(query) {
-        setLoading(true);
-        const searchUrl = `/api/search?query=${encodeURIComponent(query)}`;
+        const searchUrl = `/api/search?query=${encodeURI(query)}`;
         const result = await fetch(searchUrl, {
             method: "POST",
         }).catch(error => alert("An error occurred: " + error));
@@ -80,15 +69,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function performSearch(query) {
-        setLoading(true);
-        const searchUrl = `/api/search?query=${encodeURIComponent(query)}`;
+        const searchUrl = `/api/search?query=${encodeURI(query)}`;
         const result = await fetch(searchUrl, {
             method: "POST",
         }).catch(error => alert("An error occurred: " + error));
 
         const data = await result.json();
 
-        window.history.pushState({}, '', "?q=" + encodeURIComponent(query));
+        window.history.pushState({}, '', "?q=" + encodeURI(query));
 
         hideSearchContainer();
         renderResults(data);
