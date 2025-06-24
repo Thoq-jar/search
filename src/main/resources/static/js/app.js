@@ -54,12 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
             urlElement.href = "https://" + result.url;
             urlElement.textContent = result.url;
 
-            const iconElement = document.createElement("img");
-            iconElement.classList.add("result-icon");
-            iconElement.src = result.icon;
-            iconElement.alt = "error";
-
-            urlElement.appendChild(iconElement);
             resultElement.appendChild(titleElement);
             resultElement.appendChild(descriptionElement);
             resultElement.appendChild(urlElement);
