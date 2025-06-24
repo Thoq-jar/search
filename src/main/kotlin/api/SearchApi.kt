@@ -33,8 +33,9 @@ data class SearchResponse(
     val results: List<SearchResult>
 )
 
-suspend fun search(query: String ): String {
+suspend fun search(query: String): String {
     val results = mutableListOf<SearchResult>()
+    println("searching... $query")
     val keywords = arrayOf(
         "stackoverflow",
         "stack overflow",
@@ -53,19 +54,20 @@ suspend fun search(query: String ): String {
         "times"
     )
     val client = HttpClient(CIO)
+    println("client created")
     val response = client.request("https://html.duckduckgo.com/html/?q=$query") {
         method = io.ktor.http.HttpMethod.Get
         userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36")
     }
 
+    println("status: ${response.status}")
     if(response.status.value != 200) return """{"error": "HTTP ${response.status}"}"""
-
-    println("Response: ${response.status}")
 
     val responseText = response.body<String>()
     val document = Ksoup.parse(responseText)
     val resultSelector = ".result"
 
+    println("document parsed")
     document.select(resultSelector).forEach { result ->
         var ranking = 0
 
@@ -96,8 +98,10 @@ suspend fun search(query: String ): String {
         )
     }
 
-    println("Results: $results")
+    println("sorting...")
     val sortedResults = results.sortedBy { it.ranking }
 
+    println("return: $results")
+    println("sorted: $sortedResults")
     return Json.encodeToString(SearchResponse(sortedResults))
 }
