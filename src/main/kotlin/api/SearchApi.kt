@@ -25,6 +25,7 @@ data class SearchResult(
     val title: String,
     val snippet: String,
     val url: String,
+    val ranking: Int
 )
 
 @Serializable
@@ -32,9 +33,25 @@ data class SearchResponse(
     val results: List<SearchResult>
 )
 
-suspend fun search(query: String): String {
+suspend fun search(query: String ): String {
     val results = mutableListOf<SearchResult>()
-
+    val keywords = arrayOf(
+        "stackoverflow",
+        "stack overflow",
+        "reddit",
+        "stack exchange",
+        "stackexchange"
+    )
+    val lowKeywords = arrayOf(
+        "ai",
+        "artificial",
+        "intelligence",
+        "chatgpt",
+        "chat gpt",
+        "claude",
+        "grok",
+        "times"
+    )
     val client = HttpClient(CIO)
     val response = client.request("https://html.duckduckgo.com/html/?q=$query") {
         method = io.ktor.http.HttpMethod.Get
@@ -48,12 +65,37 @@ suspend fun search(query: String): String {
     val resultSelector = ".result"
 
     document.select(resultSelector).forEach { result ->
-        results.add(SearchResult(
-            title = result.select(".result__title").text(),
-            snippet = result.select(".result__snippet").text(),
-            url = result.select(".result__url").text()
-        ))
+        var ranking = 0
+
+        fun checkKeywords(keywordList: Array<String>) {
+            keywordList.forEachIndexed { index, keyword ->
+                if(result.select(".result__title").text().contains(keyword, ignoreCase = true)) {
+                    ranking = index + 3
+                    return@forEachIndexed
+                }
+
+                if(result.select(".result__snippet").text().contains(keyword, ignoreCase = true)) {
+                    ranking = index + 2
+                    return@forEachIndexed
+                }
+            }
+        }
+
+        checkKeywords(keywords)
+        checkKeywords(lowKeywords)
+
+        results.add(
+            SearchResult(
+                title = result.select(".result__title").text(),
+                snippet = result.select(".result__snippet").text(),
+                url = result.select(".result__url").text(),
+                ranking = ranking
+            )
+        )
     }
 
-    return Json.encodeToString(SearchResponse(results))
+    println("Results: $results")
+    val sortedResults = results.sortedBy { it.ranking }
+
+    return Json.encodeToString(SearchResponse(sortedResults))
 }

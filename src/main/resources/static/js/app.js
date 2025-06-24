@@ -53,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
             urlElement.classList.add("result-url");
             urlElement.href = "https://" + result.url;
             urlElement.textContent = result.url;
+            urlElement.target = "_blank";
 
             resultElement.appendChild(titleElement);
             resultElement.appendChild(descriptionElement);
