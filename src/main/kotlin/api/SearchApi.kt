@@ -53,7 +53,11 @@ suspend fun search(query: String): String {
         "grok",
         "times"
     )
-    val client = HttpClient(CIO)
+    val client = HttpClient(CIO) {
+        engine {
+            requestTimeout = 30000
+        }
+    }
     println("client created")
     val response = client.request("https://html.duckduckgo.com/html/?q=$query") {
         method = io.ktor.http.HttpMethod.Get
