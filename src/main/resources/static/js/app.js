@@ -1,30 +1,38 @@
-/*
- * Copyright (c) Search 2024-2025.
- * This file is a part of the Search project.
- * Search Repo: http://github.com/thoq-jar/search
- *
- * You should have received a copy of
- * the MIT License with the project,
- * if not, you may get a copy here:
- * MIT License: https://opensource.org/license/mit
- */
 document.addEventListener("DOMContentLoaded", () => {
     const searchContainer = document.getElementById("search-container");
     const searchBar = document.getElementById("search-bar");
     const searchForm = document.getElementById("search-form");
     const searchButton = document.getElementById("search-button");
     const resultsContainer = document.getElementById("results-container");
+    const homepageSection = document.getElementById("homepage-section");
+    const loadingContainer = document.getElementById("loading-container");
+
+    if(window.location.toString().includes("?q=")) {
+        const query = decodeURIComponent(window.location.search.split("=")[1]);
+        searchBar.value = query;
+        performSearchWithoutRedirect(query).then();
+    }
 
     function hideSearchContainer() {
         searchContainer.classList.add("hidden");
+        homepageSection.classList.add("hidden");
     }
 
     function showResultsContainer() {
         resultsContainer.classList.remove("hidden");
     }
 
+    function setLoading(loading) {
+        if(loading) {
+            loadingContainer.classList.remove("hidden");
+        } else {
+            loadingContainer.classList.add("hidden");
+        }
+    }
+
     function renderResults(jsonResults) {
         showResultsContainer();
+        setLoading(false);
 
         resultsContainer.innerHTML = '';
 
@@ -45,6 +53,12 @@ document.addEventListener("DOMContentLoaded", () => {
             urlElement.href = "https://" + result.url;
             urlElement.textContent = result.url;
 
+            const iconElement = document.createElement("img");
+            iconElement.classList.add("result-icon");
+            iconElement.src = result.icon;
+            iconElement.alt = "error";
+
+            urlElement.appendChild(iconElement);
             resultElement.appendChild(titleElement);
             resultElement.appendChild(descriptionElement);
             resultElement.appendChild(urlElement);
@@ -52,19 +66,40 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    async function performSearchWithoutRedirect(query) {
+        setLoading(true);
+        const searchUrl = `/api/search?query=${encodeURIComponent(query)}`;
+        const result = await fetch(searchUrl, {
+            method: "POST",
+        }).catch(error => alert("An error occurred: " + error));
+
+        const data = await result.json();
+
+        hideSearchContainer();
+        renderResults(data);
+    }
+
+    async function performSearch(query) {
+        setLoading(true);
+        const searchUrl = `/api/search?query=${encodeURIComponent(query)}`;
+        const result = await fetch(searchUrl, {
+            method: "POST",
+        }).catch(error => alert("An error occurred: " + error));
+
+        const data = await result.json();
+
+        window.history.pushState({}, '', "?q=" + encodeURIComponent(query));
+
+        hideSearchContainer();
+        renderResults(data);
+    }
+
     searchForm.addEventListener("submit", async(event) => {
         event.preventDefault();
 
         const query = searchBar.value;
-        const searchUrl = `/api/search?query=${encodeURI(query)}`;
-        const result = await fetch(searchUrl, {
-            method: "POST",
-        }).catch(error => alert("An error occurred: " + error));
-        const data = await result.json();
-
+        performSearch(query).then();
         searchBar.value = "";
-        hideSearchContainer();
-        renderResults(data);
     });
 
     searchButton.addEventListener("click", () => {

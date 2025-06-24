@@ -21,27 +21,37 @@
 </head>
 <body>
 <div class="wrapper">
-    <h1 class="title">Search</h1>
+    <div class="homepage-section" id="homepage-section">
+        <h1 class="title">Search</h1>
 
-    <div class="search-container" id="search-container">
-        <form id="search-form">
-            <label for="search-bar"></label>
-            <input type="text"
-                   id="search-bar"
-                   class="search-bar"
-                   placeholder="Search the web in private..."
-                   autocapitalize="on"
-                   spellcheck="true"
-                   autocomplete="off"
-                   autofocus
-            >
-        </form>
+        <div class="search-container" id="search-container">
+            <form id="search-form">
+                <label for="search-bar"></label>
+                <input type="text"
+                       id="search-bar"
+                       class="search-bar"
+                       placeholder="Search the web in private..."
+                       autocapitalize="on"
+                       spellcheck="true"
+                       autocomplete="off"
+                       autofocus
+                >
+            </form>
 
-        <button id="search-button">Search</button>
+            <button id="search-button">Search</button>
+        </div>
+
+        <div class="loading-container hidden" id="loading-container">
+            <p class="brand-tag">Searching...</p>
+        </div>
     </div>
 
     <div class="results-container hidden" id="results-container">
-        <div id="results"></div>
+        <div class="results-header hidden" id="results-header">
+            <h1 onclick="window.location.reload()">
+                Search
+            </h1>
+        </div>
     </div>
 </div>
 </body>
