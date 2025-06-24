@@ -33,11 +33,20 @@ fun Application.configureRouting() {
 
             try {
                 val searchResult = search(searchQuery)
-                call.respondText(
-                    searchResult,
-                    ContentType.Application.Json,
-                    HttpStatusCode.OK
-                )
+                
+                if (searchResult.startsWith("""{"error":""")) {
+                    call.respondText(
+                        searchResult,
+                        ContentType.Application.Json,
+                        HttpStatusCode.BadGateway
+                    )
+                } else {
+                    call.respondText(
+                        searchResult,
+                        ContentType.Application.Json,
+                        HttpStatusCode.OK
+                    )
+                }
             } catch (e: Exception) {
                 println("Route error: ${e.message}")
                 e.printStackTrace()
