@@ -1,0 +1,23 @@
+<!--
+  ~ Copyright (c) Search 2024-2025.
+  ~ This file is a part of the Search project.
+  ~ Search Repo: http://github.com/thoq-jar/search
+  ~
+  ~ You should have received a copy of
+  ~ the MIT License with the project,
+  ~ if not, you may get a copy here:
+  ~ MIT License: https://opensource.org/license/mit
+  -->
+
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+    <logger name="org.eclipse.jetty" level="INFO"/>
+    <logger name="io.netty" level="INFO"/>
+</configuration>
