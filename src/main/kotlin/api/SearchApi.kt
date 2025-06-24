@@ -53,59 +53,64 @@ suspend fun search(query: String): String {
         "grok",
         "times"
     )
+    
     val client = HttpClient(CIO) {
         engine {
             requestTimeout = 30000
         }
     }
-    println("client created")
-    val response = client.request("https://html.duckduckgo.com/html/?q=$query") {
-        method = io.ktor.http.HttpMethod.Get
-        userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36")
-    }
-
-    println("status: ${response.status}")
-    if(response.status.value != 200) return """{"error": "HTTP ${response.status}"}"""
-
-    val responseText = response.body<String>()
-    val document = Ksoup.parse(responseText)
-    val resultSelector = ".result"
-
-    println("document parsed")
-    document.select(resultSelector).forEach { result ->
-        var ranking = 0
-
-        fun checkKeywords(keywordList: Array<String>) {
-            keywordList.forEachIndexed { index, keyword ->
-                if(result.select(".result__title").text().contains(keyword, ignoreCase = true)) {
-                    ranking = index + 3
-                    return@forEachIndexed
-                }
-
-                if(result.select(".result__snippet").text().contains(keyword, ignoreCase = true)) {
-                    ranking = index + 2
-                    return@forEachIndexed
-                }
-            }
+    
+    return try {
+        val response = client.request("https://html.duckduckgo.com/html/?q=$query") {
+            method = io.ktor.http.HttpMethod.Get
+            userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36")
         }
 
-        checkKeywords(keywords)
-        checkKeywords(lowKeywords)
+        if(response.status.value != 200) return """{"error": "HTTP ${response.status}"}"""
 
-        results.add(
-            SearchResult(
-                title = result.select(".result__title").text(),
-                snippet = result.select(".result__snippet").text(),
-                url = result.select(".result__url").text(),
-                ranking = ranking
+        val responseText = response.body<String>()
+        val document = Ksoup.parse(responseText)
+        val resultSelector = ".result"
+
+        document.select(resultSelector).forEach { result ->
+            var ranking = 0
+
+            fun checkKeywords(keywordList: Array<String>) {
+                keywordList.forEachIndexed { index, keyword ->
+                    if(result.select(".result__title").text().contains(keyword, ignoreCase = true)) {
+                        ranking = index + 3
+                        return@forEachIndexed
+                    }
+
+                    if(result.select(".result__snippet").text().contains(keyword, ignoreCase = true)) {
+                        ranking = index + 2
+                        return@forEachIndexed
+                    }
+                }
+            }
+
+            checkKeywords(keywords)
+            checkKeywords(lowKeywords)
+
+            results.add(
+                SearchResult(
+                    title = result.select(".result__title").text(),
+                    snippet = result.select(".result__snippet").text(),
+                    url = result.select(".result__url").text(),
+                    ranking = ranking
+                )
             )
-        )
+        }
+
+        val sortedResults = results.sortedBy { it.ranking }
+
+        Json.encodeToString(SearchResponse(sortedResults))
+        
+    } catch (e: Exception) {
+        println("Error during search: ${e.message}")
+        e.printStackTrace()
+        """{"error": "Search failed: ${e.message}"}"""
+    } finally {
+        client.close()
     }
-
-    println("sorting...")
-    val sortedResults = results.sortedBy { it.ranking }
-
-    println("return: $results")
-    println("sorted: $sortedResults")
-    return Json.encodeToString(SearchResponse(sortedResults))
 }

@@ -12,6 +12,7 @@
 package dev.thoq
 
 import dev.thoq.api.search
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.response.*
@@ -21,11 +22,31 @@ fun Application.configureRouting() {
     routing {
         get("/api/search") {
             val searchQuery = call.queryParameters["query"] ?: ""
-            if(searchQuery.isEmpty()) return@get call.respondText("""{"error": "Query is empty"}""")
+            if(searchQuery.isEmpty()) {
+                call.respondText(
+                    """{"error": "Query is empty"}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.BadRequest
+                )
+                return@get
+            }
 
-            val searchResult = search(searchQuery)
-
-            call.respondText(searchResult)
+            try {
+                val searchResult = search(searchQuery)
+                call.respondText(
+                    searchResult,
+                    ContentType.Application.Json,
+                    HttpStatusCode.OK
+                )
+            } catch (e: Exception) {
+                println("Route error: ${e.message}")
+                e.printStackTrace()
+                call.respondText(
+                    """{"error": "Internal server error"}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.InternalServerError
+                )
+            }
         }
 
         staticResources("/", "static")
