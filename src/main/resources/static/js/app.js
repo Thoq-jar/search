@@ -66,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const searchUrl = `/api/search?query=${encodeURI(query)}`;
         const result = await fetch(searchUrl, {
             method: "GET",
+            signal: AbortSignal.timeout(30000)
         }).catch(error => alert("An error occurred: " + error));
 
         const data = await result.json();
@@ -78,6 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const searchUrl = `/api/search?query=${encodeURI(query)}`;
         const result = await fetch(searchUrl, {
             method: "GET",
+            signal: AbortSignal.timeout(30000)
         }).catch(error => alert("An error occurred: " + error));
 
         const data = await result.json();
