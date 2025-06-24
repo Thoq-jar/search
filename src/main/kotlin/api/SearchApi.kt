@@ -60,6 +60,8 @@ suspend fun search(query: String ): String {
 
     if(response.status.value != 200) return """{"error": "HTTP ${response.status}"}"""
 
+    println("Response: ${response.status}")
+
     val responseText = response.body<String>()
     val document = Ksoup.parse(responseText)
     val resultSelector = ".result"
