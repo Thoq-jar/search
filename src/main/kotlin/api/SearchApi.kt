@@ -25,7 +25,6 @@ data class SearchResult(
     val title: String,
     val snippet: String,
     val url: String,
-    val icon: String
 )
 
 @Serializable
@@ -52,8 +51,7 @@ suspend fun search(query: String): String {
         results.add(SearchResult(
             title = result.select(".result__title").text(),
             snippet = result.select(".result__snippet").text(),
-            url = result.select(".result__url").text(),
-            icon = result.select(".result__icon").attr("src")
+            url = result.select(".result__url").text()
         ))
     }
 
