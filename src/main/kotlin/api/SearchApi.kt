@@ -59,54 +59,80 @@ suspend fun search(query: String): String {
             requestTimeout = 30000
         }
     }
-
+    
     return try {
-        val response = client.request("https://html.duckduckgo.com/html/?q=$query") {
+        kotlinx.coroutines.delay(1000)
+        
+        val response = client.request("https://html.duckduckgo.com/html/?q=${java.net.URLEncoder.encode(query, "UTF-8")}") {
             method = io.ktor.http.HttpMethod.Get
-            userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36")
+            userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            
+            header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+            header("Accept-Language", "en-US,en;q=0.5")
+            header("Accept-Encoding", "gzip, deflate, br")
+            header("DNT", "1")
+            header("Connection", "keep-alive")
+            header("Upgrade-Insecure-Requests", "1")
+            header("Sec-Fetch-Dest", "document")
+            header("Sec-Fetch-Mode", "navigate")
+            header("Sec-Fetch-Site", "none")
+            header("Cache-Control", "max-age=0")
         }
 
         println("Response status: ${response.status}")
 
-        if(response.status.value != 200) return """{"error": "HTTP ${response.status}"}"""
+        when (response.status.value) {
+            200 -> {
+                val responseText = response.body<String>()
+                val document = Ksoup.parse(responseText)
+                val resultSelector = ".result"
 
-        val responseText = response.body<String>()
-        val document = Ksoup.parse(responseText)
-        val resultSelector = ".result"
+                document.select(resultSelector).forEach { result ->
+                    var ranking = 0
 
-        document.select(resultSelector).forEach { result ->
-            var ranking = 0
+                    fun checkKeywords(keywordList: Array<String>) {
+                        keywordList.forEachIndexed { index, keyword ->
+                            if(result.select(".result__title").text().contains(keyword, ignoreCase = true)) {
+                                ranking = index + 3
+                                return@forEachIndexed
+                            }
 
-            fun checkKeywords(keywordList: Array<String>) {
-                keywordList.forEachIndexed { index, keyword ->
-                    if(result.select(".result__title").text().contains(keyword, ignoreCase = true)) {
-                        ranking = index + 3
-                        return@forEachIndexed
+                            if(result.select(".result__snippet").text().contains(keyword, ignoreCase = true)) {
+                                ranking = index + 2
+                                return@forEachIndexed
+                            }
+                        }
                     }
 
-                    if(result.select(".result__snippet").text().contains(keyword, ignoreCase = true)) {
-                        ranking = index + 2
-                        return@forEachIndexed
-                    }
+                    checkKeywords(keywords)
+                    checkKeywords(lowKeywords)
+
+                    results.add(
+                        SearchResult(
+                            title = result.select(".result__title").text(),
+                            snippet = result.select(".result__snippet").text(),
+                            url = result.select(".result__url").text(),
+                            ranking = ranking
+                        )
+                    )
                 }
+
+                val sortedResults = results.sortedBy { it.ranking }
+                Json.encodeToString(SearchResponse(sortedResults))
             }
-
-            checkKeywords(keywords)
-            checkKeywords(lowKeywords)
-
-            results.add(
-                SearchResult(
-                    title = result.select(".result__title").text(),
-                    snippet = result.select(".result__snippet").text(),
-                    url = result.select(".result__url").text(),
-                    ranking = ranking
-                )
-            )
+            202 -> {
+                """{"error": "Search service is temporarily unavailable. Please try again in a few moments."}"""
+            }
+            429 -> {
+                """{"error": "Too many requests. Please wait before searching again."}"""
+            }
+            403 -> {
+                """{"error": "Access denied by search service. Please try again later."}"""
+            }
+            else -> {
+                """{"error": "Search service returned HTTP ${response.status.value}"}"""
+            }
         }
-
-        val sortedResults = results.sortedBy { it.ranking }
-
-        Json.encodeToString(SearchResponse(sortedResults))
         
     } catch (e: Exception) {
         println("Error during search: ${e.message}")
