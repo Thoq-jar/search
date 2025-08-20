@@ -21,6 +21,16 @@ plugins {
 group = "dev.thoq"
 version = "0.0.1"
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+kotlin {
+    jvmToolchain(21)
+}
+
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
 }
