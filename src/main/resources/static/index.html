@@ -16,15 +16,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="dark light">
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#101010" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
     <title>Search</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
-    <script src="/js/app.js"></script>
-
+    <script type="module" src="js/app.js" defer></script>
 </head>
 <body>
 <div class="wrapper">
+    <div class="nav-header hidden" id="nav-header">
+        <div class="nav-logo" id="nav-logo">Search</div>
+
+        <div class="nav-search-container" id="nav-search-container">
+            <form id="nav-search-form">
+                <label for="nav-search-bar"></label>
+                <input type="text"
+                       id="nav-search-bar"
+                       placeholder="Search..."
+                       autocapitalize="on"
+                       spellcheck="true"
+                       autocomplete="off"
+                >
+            </form>
+            <button id="nav-search-button">Search</button>
+        </div>
+    </div>
+
     <div class="homepage-section" id="homepage-section">
         <h1 class="title">Search</h1>
 
@@ -41,21 +61,16 @@
                        autofocus
                 >
             </form>
-
             <button id="search-button">Search</button>
-        </div>
-
-        <div class="loading-container hidden" id="loading-container">
-            <p class="brand-tag">Searching...</p>
         </div>
     </div>
 
+    <div class="loading-container hidden" id="loading-container">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Searching...</div>
+    </div>
+
     <div class="results-container hidden" id="results-container">
-        <div class="results-header hidden" id="results-header">
-            <h1 onclick="window.location.reload()">
-                Search
-            </h1>
-        </div>
     </div>
 </div>
 </body>

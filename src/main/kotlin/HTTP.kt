@@ -15,8 +15,6 @@ import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.cachingheaders.*
-import io.ktor.server.plugins.compression.*
-import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.hsts.*
 import io.ktor.server.plugins.partialcontent.*
@@ -31,17 +29,6 @@ fun Application.configureHTTP() {
                 else -> CachingOptions(CacheControl.MaxAge(maxAgeSeconds = 24 * 60 * 60))
             }
         }
-    }
-    install(Compression)
-    install(CORS) {
-        allowMethod(HttpMethod.Options)
-        allowMethod(HttpMethod.Put)
-        allowMethod(HttpMethod.Delete)
-        allowMethod(HttpMethod.Patch)
-        allowHeader(HttpHeaders.Authorization)
-        // this is ok because this is an open-source project,
-        // if you are deploying this, you may want to change this
-        anyHost()
     }
     install(DefaultHeaders) {
         header("X-Engine", "Ktor")

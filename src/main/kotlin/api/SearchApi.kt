@@ -16,6 +16,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.client.engine.cio.*
 import com.fleeksoft.ksoup.Ksoup
+import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.http.userAgent
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -35,7 +36,6 @@ data class SearchResponse(
 
 suspend fun search(query: String): String {
     val results = mutableListOf<SearchResult>()
-    println("searching... $query")
     val keywords = arrayOf(
         "stackoverflow",
         "stack overflow",
@@ -58,6 +58,7 @@ suspend fun search(query: String): String {
         engine {
             requestTimeout = 30000
         }
+        install(ContentEncoding)
     }
     
     return try {
@@ -69,7 +70,7 @@ suspend fun search(query: String): String {
             
             header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
             header("Accept-Language", "en-US,en;q=0.5")
-            header("Accept-Encoding", "gzip, deflate, br")
+            header("Accept-Encoding", "deflate")
             header("DNT", "1")
             header("Connection", "keep-alive")
             header("Upgrade-Insecure-Requests", "1")
@@ -78,8 +79,6 @@ suspend fun search(query: String): String {
             header("Sec-Fetch-Site", "none")
             header("Cache-Control", "max-age=0")
         }
-
-        println("Response status: ${response.status}")
 
         when (response.status.value) {
             200 -> {
@@ -134,10 +133,10 @@ suspend fun search(query: String): String {
             }
         }
         
-    } catch (e: Exception) {
-        println("Error during search: ${e.message}")
-        e.printStackTrace()
-        """{"error": "Search failed: ${e.message}"}"""
+    } catch (ex: Exception) {
+        println("Error during search: ${ex.message}")
+        ex.printStackTrace()
+        """{"error": "Search failed: ${ex.message}"}"""
     } finally {
         client.close()
     }

@@ -34,8 +34,7 @@ fun Application.configureRouting() {
             try {
                 val searchResult = search(searchQuery)
 
-                println("Search result: $searchResult")
-                if (searchResult.startsWith("""{"error":""")) {
+                if(searchResult.startsWith("""{"error":""")) {
                     call.respondText(
                         searchResult,
                         ContentType.Application.Json,
@@ -48,7 +47,7 @@ fun Application.configureRouting() {
                         HttpStatusCode.OK
                     )
                 }
-            } catch (e: Exception) {
+            } catch(e: Exception) {
                 println("Route error: ${e.message}")
                 e.printStackTrace()
                 call.respondText(

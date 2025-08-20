@@ -31,6 +31,7 @@ repositories {
 
 dependencies {
     implementation("io.ktor:ktor-server-caching-headers")
+    implementation("io.ktor:ktor-client-encoding")
     implementation("io.ktor:ktor-client-cio")
     implementation("io.ktor:ktor-server-compression")
     implementation("io.ktor:ktor-server-cors")

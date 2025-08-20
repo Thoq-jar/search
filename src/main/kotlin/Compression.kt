@@ -12,16 +12,9 @@
 package dev.thoq
 
 import io.ktor.server.application.*
+import io.ktor.server.plugins.compression.Compression
 
-fun main(args: Array<String>) {
-    io.ktor.server.netty.EngineMain.main(args)
-}
 
-fun Application.module() {
-    configureHTTP()
-    configureCompression()
-    configureSecurity()
-    configureSerialization()
-    configureTemplating()
-    configureRouting()
+fun Application.configureCompression() {
+    install(Compression)
 }
